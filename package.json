@@ -41,7 +41,7 @@
     }
   ],
   "scripts": {
-    "start": "grunt foundation",
+    "start": "grunt server",
     "build": "grunt build",
     "docs": "grunt docs",
     "release": "grunt default"

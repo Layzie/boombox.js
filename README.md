@@ -178,9 +178,9 @@ $ npm run start # Starting local server.
 
 **Access in your favorite browser**
 
-> If you load `boombox.js` in script tag: [http://0.0.0.0:1109/m/boombox/spec/global.html](http://0.0.0.0:1109/m/boombox.js/spec/global.html)
+> If you load `boombox.js` in script tag: [http://0.0.0.0:1109/spec/global.html](http://0.0.0.0:1109/spec/global.html)
 >
-> If you load `boombox.js` using require.js : [http://0.0.0.0:1109/m/boombox/spec/requirejs.html](http://0.0.0.0:1109/m/boombox.js/spec/requirejs.html#)
+> If you load `boombox.js` using require.js : [http://0.0.0.0:1109/spec/requirejs.html](http://0.0.0.0:1109/spec/requirejs.html#)
 
 ## Usage
 
@@ -219,7 +219,7 @@ var options = {
     src: [
         {
             media: 'audio/mp4',
-            path: 'http://0.0.0.0:1109/m/spec/media/sound.m4a'
+            path: 'http://0.0.0.0:1109/spec/media/sound.m4a'
         }
     ]
 };

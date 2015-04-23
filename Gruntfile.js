@@ -16,12 +16,19 @@
             clean: {
                 src: ['docs', 'report']
             },
-            exec: {
-                spec_foundation: {
-                    command: 'beez-foundation -c spec/foundation/spec.js -a ' + project.name + ':' + project.dir,
-                    stdout: true,
-                    stderr: true
-                },
+            'http-server': {
+
+                'dev': {
+
+                    root: './',
+                    port: 1109,
+                    host: "0.0.0.0",
+                    showDir : true,
+                    autoIndex: true,
+                    ext: "html",
+                    runInBackground: false
+                }
+
             },
             jshint: {
                 src: ['boombox.js'],
@@ -74,8 +81,8 @@
         require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
         // task: foundation
-        grunt.registerTask('foundation', [
-            'exec:spec_foundation'
+        grunt.registerTask('server', [
+            'http-server:dev'
         ]);
 
         // task: build

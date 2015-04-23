@@ -184,9 +184,9 @@ $ npm run start # ローカルサーバ起動
 
 **ブラウザでアクセスしてください。**
 
-> script タグ : [http://0.0.0.0:1109/m/boombox/spec/global.html](http://0.0.0.0:1109/m/boombox.js/spec/global.html)
+> script タグ : [http://0.0.0.0:1109/spec/global.html](http://0.0.0.0:1109/spec/global.html)
 >
-> require.js : [http://0.0.0.0:1109/m/boombox/spec/requirejs.html](http://0.0.0.0:1109/m/boombox.js/spec/requirejs.html#)
+> require.js : [http://0.0.0.0:1109/spec/requirejs.html](http://0.0.0.0:1109/spec/requirejs.html#)
 
 ## Usage
 
@@ -225,7 +225,7 @@ var options = {
     src: [
         {
             media: 'audio/mp4',
-            path: 'http://0.0.0.0:1109/m/spec/media/sound.m4a'
+            path: 'http://0.0.0.0:1109/spec/media/sound.m4a'
         }
     ]
 };
