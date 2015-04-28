@@ -19,13 +19,6 @@
     "esnext": true,
 
     "predef"        : [ // Extra globals.
-        //"describe",   // Used by mocha
-        //"it",         // Used by mocha
-        //"before",     // Used by mocha
-        //"beforeEach", // Used by mocha
-        //"after",      // Used by mocha
-        //"afterEach"   // Used by mocha
-        //"expect"      // Used by chai(expect)
         "define",       // Used by require.js
         "require",      // Used by require.js
         "requirejs",     // Used by require.js

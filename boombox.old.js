@@ -33,8 +33,8 @@
 
     var isRequire = !!(typeof define === 'function' && define.amd);
 
-    const SPRITE_SEPARATOR = '-';
-    const LOGGER_DEFAULT_SEPARATOR = '-';
+    var SPRITE_SEPARATOR = '-';
+    var LOGGER_DEFAULT_SEPARATOR = '-';
 
     var getSpriteName = function (name) {
         return {
@@ -53,19 +53,22 @@
      *
      */
     var LOG_LEVEL = 3; // default: info
-    var slice = Array.prototype.slice;
 
-    class Logger {
-        constructor(prefix) {
+    var Logger = (function () {
+        var ArrayProto = Array.prototype;
+        var slice = ArrayProto.slice;
+
+        function Logger(prefix) {
             this.prefix = prefix || LOGGER_DEFAULT_SEPARATOR;
             this.prefix = '[' + this.prefix + ']';
         }
-        trace() {
+
         /**
          * Log output (trace)
          * @memberof Logger
          * @name trace
          */
+        Logger.prototype.trace = function () {
             if (LOG_LEVEL <= 1) {
                 if (!w.console) {
                 } else if (w.console.trace) {
@@ -76,13 +79,14 @@
                     w.console.log('[TRACE]', this.prefix, slice.call(arguments).join(' '));
                 }
             }
-        }
-        debug() {
+        };
+
         /**
-         * Log output (info)
+         * Log output (debug)
          * @memberof Logger
          * @name debug
          */
+        Logger.prototype.debug = function () {
             if (LOG_LEVEL <= 2) {
                 if (!w.console) {
                 } else if (w.console.debug) {
@@ -91,44 +95,52 @@
                     w.console.log('[DEBUG]', this.prefix, slice.call(arguments).join(' '));
                 }
             }
-        }
-        info() {
+        };
+
         /**
          * Log output (info)
          * @memberof Logger
          * @name info
          */
+        Logger.prototype.info = function () {
             if (LOG_LEVEL <= 3) {
                 w.console && w.console.info('[INFO]', this.prefix, slice.call(arguments).join(' '));
             }
-        }
-        warn() {
+        };
+
         /**
          * Log output (warn)
          * @memberof Logger
          * @name warn
          */
+        Logger.prototype.warn = function () {
             if (LOG_LEVEL <= 4) {
                 w.console && w.console.warn('[WARN]', this.prefix, slice.call(arguments).join(' '));
             }
-        }
-        error() {
+        };
+
         /**
          * Log output (error)
          * @memberof Logger
          * @name error
          */
+        Logger.prototype.error = function () {
             if (LOG_LEVEL <= 5) {
                 w.console && w.console.error('[ERROR]', this.prefix, slice.call(arguments).join(' '));
             }
-        }
-    }
+        };
+
+        return Logger;
+
+    })();
+
 
     //////////////////////////////////
     // Boombox Class
 
-    class Boombox {
-        constructor() {
+    var Boombox = (function () {
+        function Boombox() {
+
             /**
              * Version
              * @memberof Boombox
@@ -352,7 +364,9 @@
             this.filter = {};
 
         }
-        isWebAudio() {
+
+        //// prototype
+
         /**
          * The availability of the WebLAudio
          *
@@ -360,9 +374,10 @@
          * @name isWebAudio
          * @return {Boolean}
          */
+        Boombox.prototype.isWebAudio = function () {
             return this.support.webaudio.use;
-        }
-        isHTMLAudio() {
+        };
+
         /**
          * The availability of the HTMLAudio
          *
@@ -370,9 +385,10 @@
          * @name isHTMLAudio
          * @return {Boolean}
          */
+        Boombox.prototype.isHTMLAudio = function () {
             return this.support.htmlaudio.use;
-        }
-        isHTMLVideo() {
+        };
+
         /**
          * The availability of the HTMLVideo
          *
@@ -380,21 +396,30 @@
          * @name isHTMLVideo
          * @return {Boolean}
          */
+        Boombox.prototype.isHTMLVideo = function () {
             return this.support.htmlvideo.use;
-        }
-        isPlayback() {
+        };
+
+        /**
+         * boombox to manage, Audio is playing
+         *
+         * @memberof Boombox
+         * @name isPlayback
+         * @return {Boolean}
+         */
+        Boombox.prototype.isPlayback = function () {
+            var self = this;
             var res = false;
 
-            for (let name in this.pool) {
+            for (var name in this.pool) {
                 if (this.pool[name].isPlayback()) {
                     res = true;
                     break;
                 }
             }
-
             return res;
-        }
-        setup(options) {
+        };
+
         /**
          * Setup processing
          *
@@ -411,6 +436,9 @@
          * }
          *
          */
+        Boombox.prototype.setup = function setup(options) {
+            var self = this;
+
             options = options || {};
 
             if (typeof options.threshold !== 'undefined') {
@@ -472,11 +500,14 @@
                 this.logger.debug('HTMLVideo use not support.');
             }
 
+            //this.logger.debug('support:', JSON.stringify(this.support));
+
+
             this.setuped = true;
 
             return this;
-        }
-        get(name) {
+        };
+
         /**
          * Get Audio instance
          *
@@ -485,9 +516,10 @@
          * @param {String} name audio name
          * @return {WebAudio|HTMLAudio|HTMLVideo}
          */
+        Boombox.prototype.get = function (name) {
             return this.pool[name];
-        }
-        load(name, options, useHTMLVideo, callback) {
+        };
+
         /**
          * Loading audio
          *
@@ -510,6 +542,7 @@
          * }
          *
          */
+        Boombox.prototype.load = function (name, options, useHTMLVideo, callback) {
             if (typeof arguments[2] === 'function') {
                 callback = useHTMLVideo;
                 useHTMLVideo = null;
@@ -592,8 +625,8 @@
 
             return this;
 
-        }
-        remove(name) {
+        };
+
         /**
          * remove audio
          *
@@ -602,16 +635,16 @@
          * @param {String} name
          * @return {Boombox}
          */
-            if (this.pool[name]) {
-                // change object
+        Boombox.prototype.remove = function (name) {
+            if (this.pool[name]) { // change object
                 this.logger.trace('Remove Audio that is pooled. name', name);
                 this.pool[name].dispose && this.pool[name].dispose();
                 this.pool[name] = undefined;
                 delete this.pool[name];
             }
             return this;
-        }
-        setPool(name, obj, Obj) {
+        };
+
         /**
          * Set pool
          *
@@ -622,9 +655,10 @@
          * @param {WebAudio|HTMLAudio|HTMLVideo} Obj Boombox audio class
          * @return {Boombox}
          */
+        Boombox.prototype.setPool = function (name, obj, Obj) {
             if (obj.isParentSprite()) {
                 for (var r in this.pool) {
-                    if (!! ~r.indexOf(name + SPRITE_SEPARATOR)) {
+                    if (!!~r.indexOf(name + SPRITE_SEPARATOR)) {
                         delete this.pool[r];
                     }
                 }
@@ -640,8 +674,8 @@
             this.pool[name] = obj;
 
             return this;
-        }
-        runfilter(audio, options) {
+        };
+
         /**
          * Run filter
          *
@@ -651,6 +685,7 @@
          * @param {Object} options
          * @return {Boolean}
          */
+        Boombox.prototype.runfilter = function (audio, options) {
             var hit;
 
             var list = options.filter || [];
@@ -678,8 +713,9 @@
             }
 
             return false;
-        }
-        useMediaType(src) {
+
+        };
+
         /**
          * check support media type
          *
@@ -688,6 +724,7 @@
          * @param {Array} src audio file data
          * @return {Object|undefined}
          */
+        Boombox.prototype.useMediaType = function (src) {
             for (var i = 0; i < src.length; i++) {
                 var t = src[i];
                 if (this._audio.canPlayType(t.media)) {
@@ -698,8 +735,8 @@
             }
 
             return undefined;
-        }
-        pause() {
+        };
+
         /**
          * pause sound playback in managing boombox
          *
@@ -707,6 +744,7 @@
          * @name pause
          * @return {boombox}
          */
+        Boombox.prototype.pause = function () {
             var self = this;
             this.logger.trace('pause');
 
@@ -717,8 +755,8 @@
             }
 
             return this;
-        }
-        resume() {
+        };
+
         /**
          * resume the paused, to manage the boombox
          *
@@ -726,6 +764,7 @@
          * @name resume
          * @return {Boombox}
          */
+        Boombox.prototype.resume = function () {
             this.logger.trace('resume');
             var name = this.waits.shift();
             if (name && this.pool[name]) {
@@ -735,8 +774,8 @@
                 this.resume();
             }
             return this;
-        }
-        power(p) {
+        };
+
         /**
          * Change all audio power on/off
          *
@@ -745,6 +784,7 @@
          * @param {Boolean} p power on/off. boombox.(POWER_ON|POWER_OFF)
          * @return {Boombox}
          */
+        Boombox.prototype.power = function (p) {
             var self = this;
             this.logger.trace('power:', this.name, 'flag:', p);
 
@@ -755,8 +795,8 @@
 
             this.state.power = p;
             return this;
-        }
-        volume(v) {
+        };
+
         /**
          * audio change volume.
          *
@@ -766,6 +806,7 @@
          * @param {Interger} v volume
          * @return {Boombox}
          */
+        Boombox.prototype.volume = function (v) {
             var self = this;
             this.logger.trace('volume:', this.name, 'volume:', v);
 
@@ -775,8 +816,8 @@
             }
 
             return this;
-        }
-        onVisibilityChange(e) {
+        };
+
         /**
          * Firing in the occurrence of events VisibilityChange
          *
@@ -784,14 +825,15 @@
          * @name onVisibilityChange
          * @param {Event} e event
          */
+        Boombox.prototype.onVisibilityChange = function (e) {
             this.logger.trace('onVisibilityChange');
             if (document[this.visibility.hidden]) {
                 this.pause();
             } else {
                 this.resume();
             }
-        }
-        onFocus(e) {
+        };
+
         /**
          * Firing in the occurrence of events window.onfocus
          *
@@ -799,10 +841,11 @@
          * @name onFocus
          * @param {Event} e event
          */
+        Boombox.prototype.onFocus = function (e) {
             this.logger.trace('onFocus');
             this.resume();
-        }
-        onBlur(e) {
+        };
+
         /**
          * Firing in the occurrence of events window.onblur
          *
@@ -810,10 +853,11 @@
          * @name onBlur
          * @param {Event} e event
          */
+        Boombox.prototype.onBlur = function (e) {
             this.logger.trace('onBlur');
             this.pause();
-        }
-        onPageShow(e) {
+        };
+
         /**
          * Firing in the occurrence of events window.onpageshow
          *
@@ -821,10 +865,11 @@
          * @name onPageShow
          * @param {Event} e event
          */
+        Boombox.prototype.onPageShow = function (e) {
             this.logger.trace('onPageShow');
             this.resume();
-        }
-        onPageHide(e) {
+        };
+
         /**
          * Firing in the occurrence of events window.onpagehide
          *
@@ -832,10 +877,11 @@
          * @name onPageHide
          * @param {Event} e event
          */
+        Boombox.prototype.onPageHide = function (e) {
             this.logger.trace('onPageHide');
             this.pause();
-        }
-        _browserControl() {
+        };
+
         /**
          * Scan browser differences
          *
@@ -843,19 +889,20 @@
          * @name _browserControl
          * @return {Boombox}
          */
+        Boombox.prototype._browserControl = function () {
             var self = this;
-            if (typeof document.hidden !== 'undefined') {
-                this.visibility.hidden = 'hidden';
-                this.visibility.visibilityChange = 'visibilitychange';
-            } else if (typeof document.webkitHidden !== 'undefined') {
-                this.visibility.hidden = 'webkitHidden';
-                this.visibility.visibilityChange = 'webkitvisibilitychange';
-            } else if (typeof document.mozHidden !== 'undefined') {
-                this.visibility.hidden = 'mozHidden';
-                this.visibility.visibilityChange = 'mozvisibilitychange';
-            } else if (typeof document.msHidden !== 'undefined') {
-                this.visibility.hidden = 'msHidden';
-                this.visibility.visibilityChange = 'msvisibilitychange';
+            if (typeof document.hidden !== "undefined") {
+                this.visibility.hidden = "hidden";
+                this.visibility.visibilityChange = "visibilitychange";
+            } else if (typeof document.webkitHidden !== "undefined") {
+                this.visibility.hidden = "webkitHidden";
+                this.visibility.visibilityChange = "webkitvisibilitychange";
+            } else if (typeof document.mozHidden !== "undefined") {
+                this.visibility.hidden = "mozHidden";
+                this.visibility.visibilityChange = "mozvisibilitychange";
+            } else if (typeof document.msHidden !== "undefined") {
+                this.visibility.hidden = "msHidden";
+                this.visibility.visibilityChange = "msvisibilitychange";
             }
             // Visibility.hidden
             if (this.visibility.hidden) {
@@ -865,7 +912,7 @@
             }
 
             // focus/blur
-            if (typeof window.addEventListener !== 'undefined') {
+            if (typeof window.addEventListener !== "undefined") {
                 window.addEventListener('focus', function (e) {
                     self.onFocus(e);
                 }, false);
@@ -892,8 +939,8 @@
 
             //
             return this;
-        }
-        addFilter(name, fn) {
+        };
+
         /**
          * Adding filtering
          *
@@ -903,16 +950,18 @@
          * @param {Function} filter function
          * @return {Boombox}
          */
+        Boombox.prototype.addFilter = function (name, fn) {
             this.filter[name] = fn;
             return this;
-        }
-        dispose() {
+        };
+
         /**
          * dispose
          *
          * @memberof Boombox
          * @name dispose
          */
+        Boombox.prototype.dispose = function () {
             for (var name in this.pool) {
                 var audio = this.pool[name];
                 audio.dispose && audio.dispose();
@@ -940,8 +989,10 @@
             delete this._audio;
             delete this._video;
             delete this.filter;
-        }
-    }
+        };
+
+        return Boombox;
+    })();
 
 
     //////////////////////////////////
@@ -952,8 +1003,8 @@
     //////////////////////////////////
     // HTMLAudio Class
 
-    class HTMLAudio {
-        constructor(name, parent) {
+    var HTMLAudio = (function () {
+        function HTMLAudio(name, parent) {
             /**
              * logger
              * @memberof HTMLAudio
@@ -1022,8 +1073,11 @@
                 };
                 this.$el = new w.Audio();
             }
+
         }
-        load(options, callback) {
+
+        ////
+
         /**
          * Loading html audio
          *
@@ -1049,6 +1103,8 @@
          * }, function callback() {});
          *
          */
+        HTMLAudio.prototype.load = function (options, callback) {
+
             var cb = callback || none;
 
             if (this.parent) { // skip audiosprite children
@@ -1068,7 +1124,6 @@
                 //crossorigin: "anonymous",
                 controls: false
             };
-
             var timeout = options.timeout || 15 * 1000;
             delete options.timeout;
 
@@ -1154,9 +1209,24 @@
 
             this.$el.load();
 
+//            setInterval(function () {
+//                console.error(self.name,
+//                              'playback:', self.isPlayback(),
+//                              'stop:', self.isStop(),
+//                              'pause:', self.isPause(),
+//                              'power:', self.state.power
+//                             );
+//            }, 100);
+
             return this;
-        }
-        isUse() {
+
+        };
+
+        //HTMLAudio.prototype.addTextTrack = function () { /**...*/ };
+        //HTMLAudio.prototype.canPlayType = function () { /**...*/ };
+
+        //////////
+
         /**
          * Is use.
          *
@@ -1165,6 +1235,7 @@
          * @name isUse
          * @return {Boolean}
          */
+        HTMLAudio.prototype.isUse = function () {
             if (this.state.power === boombox.POWER_OFF || boombox.state.power === boombox.POWER_OFF) {
                 return false;
             }
@@ -1174,8 +1245,8 @@
             }
 
             return true;
-        }
-        isPlayback() {
+        };
+
         /**
          * Is playing.
          *
@@ -1184,9 +1255,10 @@
          * @name isPlayback
          * @return {Boolean}
          */
+        HTMLAudio.prototype.isPlayback = function () {
             return !!this.state.time.playback;
-        }
-        isStop() {
+        };
+
         /**
          * Is stoped.
          *
@@ -1195,9 +1267,10 @@
          * @name isStop
          * @return {Boolean}
          */
+        HTMLAudio.prototype.isStop = function () {
             return !this.state.time.playback;
-        }
-        isPause() {
+        };
+
         /**
          * Is paused.
          *
@@ -1206,9 +1279,10 @@
          * @name isPause
          * @return {boolean}
          */
+        HTMLAudio.prototype.isPause = function () {
             return !!this.state.time.pause;
-        }
-        isLoop() {
+        };
+
         /**
          * Loop flag
          *
@@ -1217,9 +1291,10 @@
          * @name isLoop
          * @return {Interger}
          */
+        HTMLAudio.prototype.isLoop = function () {
             return (0 < this.state.loop);
-        }
-        isParentSprite() {
+        };
+
         /**
          * Is sprite of the parent
          *
@@ -1228,9 +1303,10 @@
          * @name isParentSprite
          * @return {Boolean}
          */
+        HTMLAudio.prototype.isParentSprite = function () {
             return !!(!this.parent && this.sprite && !this.sprite.current);
-        }
-        isSprite() {
+        };
+
         /**
          * Is sprite
          *
@@ -1239,9 +1315,11 @@
          * @name isSprite
          * @return {Boolean}
          */
+        HTMLAudio.prototype.isSprite = function () {
             return !!(this.parent && this.sprite && this.sprite.current);
-        }
-        clearTimerAll() {
+        };
+
+
         /**
          * Clear all the setTimeout
          *
@@ -1250,13 +1328,14 @@
          * @name clearTimerAll
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.clearTimerAll = function () {
             for (var k in this._timer) {
                 var id = this._timer[k];
                 this.clearTimer(k);
             }
             return this;
-        }
-        clearTimer(name) {
+        };
+
         /**
          * Clear specified setTimeout
          *
@@ -1266,6 +1345,7 @@
          * @param {String} name
          * @return {Interger}
          */
+        HTMLAudio.prototype.clearTimer = function (name) {
             var id = this._timer[name];
             if (id) {
                 this.logger.debug('remove setTimetout:', id);
@@ -1274,8 +1354,8 @@
             }
 
             return id;
-        }
-        setTimer(name, id) {
+        };
+
         /**
          * Save the specified setTimeout
          *
@@ -1286,14 +1366,17 @@
          * @param {Interger} id setTimeout#id
          * @return {Interger}
          */
+        HTMLAudio.prototype.setTimer = function (name, id) {
             if (this._timer[name]) {
                 this.logger.warn('Access that is not expected:', name, id);
             }
             this._timer[name] = id;
 
             return this._timer[name];
-        }
-        play(resume) {
+        };
+
+        //////////
+
         /**
          * audio play.
          *
@@ -1303,6 +1386,7 @@
          * @param {Boolean} resume resume flag
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.play = function (resume) {
             if (!this.isUse()) {
                 this.logger.debug('skip play:', this.name, 'state can not be used');
                 return this;
@@ -1365,8 +1449,8 @@
             this.$el.play();
 
             return this;
-        }
-        stop() {
+        };
+
         /**
          * audio stop.
          *
@@ -1375,6 +1459,7 @@
          * @name stop
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.stop = function () {
             if (!this.state.loaded || typeof this.state.error !== 'undefined') {
                 this.logger.debug('skip stop:', this.name, 'state can not be used');
                 return this;
@@ -1392,16 +1477,17 @@
             this.state.time.playback = undefined;
             this.state.time.name = undefined;
             return this;
-        }
-        pause() {
+        };
+
         /**
-         * audio stop.
+         * audio pause.
          *
          * @memberof HTMLAudio
          * @method
-         * @name stop
+         * @name pause
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.pause = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip pause:', this.name, 'state can not be used');
                 return this;
@@ -1418,10 +1504,11 @@
             this.$el.pause();
             this.state.time.pause = this.$el.currentTime;
             this.state.time.playback = undefined;
+            //this.state.time.name = undefined;
 
             return this;
-        }
-        resume() {
+        };
+
         /**
          * audio resume.
          *
@@ -1430,6 +1517,7 @@
          * @name resume
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.resume = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip resume:', this.name, 'state can not be used');
                 return this;
@@ -1444,8 +1532,8 @@
                 this.play(true);
             }
             return this;
-        }
-        replay() {
+        };
+
         /**
          * audio re-play.
          *
@@ -1454,6 +1542,7 @@
          * @name replay
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.replay = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip replay:', this.name, 'state can not be used');
                 return this;
@@ -1465,8 +1554,9 @@
             this.setCurrentTime(0);
             this.play();
             return this;
-        }
-        volume(v) {
+        };
+
+
         /**
          * audio change volume.
          *
@@ -1476,10 +1566,13 @@
          * @param {Interger} v volume
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.volume = function (v) {
             this.logger.trace('volume:', this.name, 'volume:', v);
             this.$el.volume = Math.max(0, Math.min(1, v));
-        }
-        _onEnded(e) {
+        };
+
+        //////////
+
         /**
          * Audio.ended events
          *
@@ -1488,6 +1581,7 @@
          * @name _onEnded
          * @param {Event} e event
          */
+        HTMLAudio.prototype._onEnded = function (e) {
             if (this.isDisposed()) { // check dispose
                 return;
             }
@@ -1504,8 +1598,8 @@
                 this.logger.trace('onended original loop play.', this.name);
                 this.play();
             }
-        }
-        onEnded() {
+        };
+
         /**
          * Override Audio.ended events
          *
@@ -1514,9 +1608,8 @@
          * @name onEnded
          * @param {Event} e event
          */
-            none();
-        }
-        setLoop(loop) {
+        HTMLAudio.prototype.onEnded = none;
+
         /**
          * Set loop flag
          *
@@ -1526,6 +1619,7 @@
          * @param {Interger} loop loop flag (Boombox.LOOP_XXX)
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.setLoop = function (loop) {
             if (!this.isUse()) { return this; } // skip!!
 
             this.state.loop = loop;
@@ -1544,8 +1638,8 @@
             }
 
             return this;
-        }
-        power(p) {
+        };
+
         /**
          * Change power on/off
          *
@@ -1555,6 +1649,7 @@
          * @param {Boolean} p power on/off. Boombox.(POWER_ON|POWER_OFF)
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.power = function (p) {
             this.logger.trace('power:', this.name, 'flag:', p);
             if (p === boombox.POWER_OFF) {
                 this.stop(); // force pause
@@ -1562,8 +1657,8 @@
             this.state.power = p;
 
             return this;
-        }
-        setCurrentTime(t) {
+        };
+
         /**
          * Set audio.currentTime
          *
@@ -1573,14 +1668,15 @@
          * @param {Interger} t set value(HTMLAudioElement.currentTime)
          * @return {HTMLAudio}
          */
+        HTMLAudio.prototype.setCurrentTime = function (t) {
             try {
                 this.$el.currentTime = t;
             } catch (e) {
                 this.logger.error('Set currentTime.', e.message);
             }
             return this;
-        }
-        isDisposed() {
+        };
+
         /**
          * Check disposed
          *
@@ -1588,9 +1684,12 @@
          * @method
          * @name isDisposed
          */
+        HTMLAudio.prototype.isDisposed = function () {
             return WebAudio.prototype.isDisposed.apply(this, arguments);
-        }
-        dispose() {
+        };
+
+        //////////
+
         /**
          * Dispose
          *
@@ -1598,6 +1697,8 @@
          * @method
          * @name dispose
          */
+        HTMLAudio.prototype.dispose = function () {
+
             delete this.name;
             delete this.state.time.playback;
             delete this.state.time.pause;
@@ -1619,14 +1720,18 @@
                 this.sprite.dispose();
             }
             delete this.sprite;
-        }
-    }
+
+        };
+
+        return HTMLAudio;
+    })();
+
     //////////////////////////////////
     // HTMLVideo Class
 
-    class HTMLVideo extends HTMLAudio {
-        constructor(name, parent) {
-            super(name, parent);
+    var HTMLVideo = (function () {
+        function HTMLVideo(name, parent) {
+
             /**
              * logger
              * @memberof HTMLVideo
@@ -1697,8 +1802,11 @@
                 this.$el = document.createElement('video');
 
             }
+
         }
-        load(options, callback) {
+
+        ///////
+
         /**
          * Loading html video
          *
@@ -1724,6 +1832,7 @@
          * }, function callback() {});
          *
          */
+        HTMLVideo.prototype.load = function (options, callback) {
             var self = this;
 
             var cb = callback || none;
@@ -1830,10 +1939,24 @@
 
             this.$el.load();
 
+//            setInterval(function () {
+//                console.error(self.name,
+//                              'playback:', self.isPlayback(),
+//                              'stop:', self.isStop(),
+//                              'pause:', self.isPause(),
+//                              'power:', self.state.power
+//                             );
+//            }, 100);
+
             return this;
 
-        }
-        isUse() {
+        };
+
+        //HTMLVideo.prototype.addTextTrack = function () { /**...*/ };
+        //HTMLVideo.prototype.canPlayType = function () { /**...*/ };
+
+        //////////
+
         /**
          * Is use. (apply HTMLAudio)
          *
@@ -1842,9 +1965,10 @@
          * @name isUse
          * @return {Boolean}
          */
-            super.isUse();
-        }
-        isPlayback() {
+        HTMLVideo.prototype.isUse = function () {
+            return boombox.HTMLAudio.prototype.isUse.apply(this, arguments);
+        };
+
         /**
          * Is playing. (apply HTMLAudio)
          *
@@ -1853,9 +1977,10 @@
          * @name isPlayback
          * @return {Boolean}
          */
-            super.isPlayback();
-        }
-        isStop() {
+        HTMLVideo.prototype.isPlayback = function () {
+            return boombox.HTMLAudio.prototype.isPlayback.apply(this, arguments);
+        };
+
         /**
          * Is stoped.
          *
@@ -1864,9 +1989,10 @@
          * @name isStop
          * @return {Boolean}
          */
-            super.isStop();
-        }
-        isPause() {
+        HTMLVideo.prototype.isStop = function () {
+            return boombox.HTMLAudio.prototype.isStop.apply(this, arguments);
+        };
+
         /**
          * Is paused.
          *
@@ -1875,9 +2001,10 @@
          * @name isPause
          * @return {Boolean}
          */
-            super.isPause();
-        }
-        isLoop() {
+        HTMLVideo.prototype.isPause = function () {
+            return boombox.HTMLAudio.prototype.isPause.apply(this, arguments);
+        };
+
         /**
          * Loop flag (apply HTMLAudio)
          *
@@ -1886,9 +2013,10 @@
          * @name isLoop
          * @return {Interger}
          */
-            super.isLoop();
-        }
-        isParentSprite() {
+        HTMLVideo.prototype.isLoop = function () {
+            return boombox.HTMLAudio.prototype.isLoop.apply(this, arguments);
+        };
+
         /**
          * Is sprite of the parent (apply HTMLAudio)
          *
@@ -1897,9 +2025,10 @@
          * @name isParentSprite
          * @return {Boolean}
          */
-            super.isParentSprite();
-        }
-        isSprite() {
+        HTMLVideo.prototype.isParentSprite = function () {
+            return boombox.HTMLAudio.prototype.isParentSprite.apply(this, arguments);
+        };
+
         /**
          * Is sprite (apply HTMLAudio)
          *
@@ -1908,9 +2037,10 @@
          * @name isSprite
          * @return {Boolean}
          */
-            super.isSprite();
-        }
-        clearTimerAll() {
+        HTMLVideo.prototype.isSprite = function () {
+            return boombox.HTMLAudio.prototype.isSprite.apply(this, arguments);
+        };
+
         /**
          * Clear all the setTimeout (apply HTMLAudio)
          *
@@ -1919,9 +2049,10 @@
          * @name clearTimerAll
          * @return {HTMLAudio}
          */
-            super.clearTimerAll();
-        }
-        clearTimer(name) {
+        HTMLVideo.prototype.clearTimerAll = function () {
+            return boombox.HTMLAudio.prototype.clearTimerAll.apply(this, arguments);
+        };
+
         /**
          * Clear specified setTimeout (apply HTMLAudio)
          *
@@ -1931,9 +2062,10 @@
          * @param {String} name
          * @return {Interger}
          */
-            super.clearTimer(name);
-        }
-        setTimer(name, id) {
+        HTMLVideo.prototype.clearTimer = function (name) {
+            return boombox.HTMLAudio.prototype.clearTimer.apply(this, arguments);
+        };
+
         /**
          * Save the specified setTimeout (apply HTMLAudio)
          *
@@ -1944,9 +2076,13 @@
          * @param {Interger} id setTimeout#id
          * @return {Interger}
          */
-            super.setTimer(name, id);
-        }
-        play(resume) {
+        HTMLVideo.prototype.setTimer = function (name, id) {
+            return boombox.HTMLAudio.prototype.setTimer.apply(this, arguments);
+        };
+
+
+        //////////
+
         /**
          * video play.
          *
@@ -1956,6 +2092,7 @@
          * @param {Boolean} resume resume flag
          * @return {HTMLVideo}
          */
+        HTMLVideo.prototype.play = function (resume) {
             if (!this.isUse()) {
                 this.logger.debug('skip play:', this.name, 'state can not be used');
                 return this;
@@ -2019,8 +2156,8 @@
 
             return this;
 
-        }
-        stop() {
+        };
+
         /**
          * video stop. (apply HTMLAudio)
          *
@@ -2029,9 +2166,10 @@
          * @name stop
          * @return {HTMLVideo}
          */
-            super.stop();
-        }
-        pause() {
+        HTMLVideo.prototype.stop = function () {
+            return boombox.HTMLAudio.prototype.stop.apply(this, arguments);
+        };
+
         /**
          * video pause. (apply HTMLAudio)
          *
@@ -2040,9 +2178,10 @@
          * @name pause
          * @return {HTMLVideo}
          */
-            super.pause();
-        }
-        resume() {
+        HTMLVideo.prototype.pause = function () {
+            return boombox.HTMLAudio.prototype.pause.apply(this, arguments);
+        };
+
         /**
          * video resume. (apply HTMLAudio)
          *
@@ -2051,9 +2190,10 @@
          * @name resume
          * @return {HTMLVideo}
          */
-            super.resume();
-        }
-        replay() {
+        HTMLVideo.prototype.resume = function () {
+            return boombox.HTMLAudio.prototype.resume.apply(this, arguments);
+        };
+
         /**
          * video re-play. (apply HTMLAudio)
          *
@@ -2062,9 +2202,10 @@
          * @name replay
          * @return {HTMLVideo}
          */
-            super.replay();
-        }
-        volume(v) {
+        HTMLVideo.prototype.replay = function () {
+            return boombox.HTMLAudio.prototype.replay.apply(this, arguments);
+        };
+
         /**
          * audio change volume. (apply HTMLAudio)
          *
@@ -2073,9 +2214,12 @@
          * @name volume
          * @return {HTMLVideo}
          */
-            super.volume(v);
-        }
-        _onEnded(e) {
+        HTMLVideo.prototype.volume = function (v) {
+            return boombox.HTMLAudio.prototype.volume.apply(this, arguments);
+        };
+
+        //////////
+
         /**
          * Video.ended events (apply HTMLAudio)
          *
@@ -2084,9 +2228,10 @@
          * @name _onEnded
          * @param {Event} e event
          */
-            super._onEnded(e);
-        }
-        onEnded() {
+        HTMLVideo.prototype._onEnded = function (e) {
+            return boombox.HTMLAudio.prototype._onEnded.apply(this, arguments);
+        };
+
         /**
          * Override Video.ended events (apply HTMLAudio)
          *
@@ -2096,9 +2241,8 @@
          * @name onEnded
          * @param {Event} e event
          */
-            none();
-        }
-        setLoop(loop) {
+        HTMLVideo.prototype.onEnded = none;
+
         /**
          * Set loop flag (apply HTMLAudio)
          *
@@ -2108,9 +2252,10 @@
          * @param {Interger} loop loop flag (Boombox.LOOP_XXX)
          * @return {HTMLVideo}
          */
-            super.setLoop(loop);
-        }
-        power(p) {
+        HTMLVideo.prototype.setLoop = function (loop) {
+            return boombox.HTMLAudio.prototype.setLoop.apply(this, arguments);
+        };
+
         /**
          * Change power on/off (apply HTMLAudio)
          *
@@ -2120,9 +2265,10 @@
          * @param {Boolean} p power on/off. boombox.(POWER_ON|POWER_OFF)
          * @return {HTMLVideo}
          */
-            super.power(p);
-        }
-        setCurrentTime(t) {
+        HTMLVideo.prototype.power = function (p) {
+            return boombox.HTMLAudio.prototype.power.apply(this, arguments);
+        };
+
         /**
          * Set video.currentTime (apply HTMLAudio)
          *
@@ -2132,9 +2278,10 @@
          * @param {Interger} t set value(Video.currentTime)
          * @return {HTMLVideo}
          */
-            super.setCurrentTime(t);
-        }
-        isDisposed() {
+        HTMLVideo.prototype.setCurrentTime = function (t) {
+            return boombox.HTMLAudio.prototype.setCurrentTime.apply(this, arguments);
+        };
+
         /**
          * Check disposed
          *
@@ -2142,9 +2289,12 @@
          * @method
          * @name isDisposed
          */
-            super.isDisposed();
-        }
-        dispose() {
+        HTMLVideo.prototype.isDisposed = function () {
+            return boombox.HTMLAudio.prototype.isDisposed.apply(this, arguments);
+        };
+
+        //////////
+
         /**
          * Dispose (apply HTMLAudio)
          *
@@ -2152,16 +2302,18 @@
          * @method
          * @name dispose
          */
-            super.dispose();
-        }
-    }
+        HTMLVideo.prototype.dispose = function () {
+            return boombox.HTMLAudio.prototype.dispose.apply(this, arguments);
+        };
+
+        return HTMLVideo;
+    })();
 
     //////////////////////////////////
     // WebAudio Class
 
-    class WebAudio extends HTMLAudio {
-        constructor(name, parent) {
-            super(name, parent);
+    var WebAudio = (function () {
+        function WebAudio(name, parent) {
             /**
              * logger
              * @memberof WebAudio
@@ -2266,7 +2418,9 @@
                 this.sprite = new Sprite(undefined, current); // new
             }
         }
-        load(options, callback) {
+
+        //////
+
         /**
          * Loading web audio
          *
@@ -2283,6 +2437,7 @@
          * }, function callback() {});
          *
          */
+        WebAudio.prototype.load = function (options, callback) {
             var self = this;
             options = options || {};
 
@@ -2361,13 +2516,25 @@
 
             http.responseType = 'arraybuffer';
 
+//            setInterval(function () {
+//                console.error(self.name,
+//                              'playback', self.isPlayback(),
+//                              'stop:', self.isStop(),
+//                              'pause:', self.isPause(),
+//                              'power:', self.state.power
+//                             );
+//            }, 100);
+
+
             /////////////////////
             /// XHR send!!
             http.send();
 
             return this;
-        }
-        isUse() {
+        };
+
+        //////////
+
         /**
          * Is use. (apply HTMLAudio)
          *
@@ -2376,9 +2543,10 @@
          * @name isUse
          * @return {Boolean}
          */
-            super.isUse();
-        }
-        isPlayback() {
+        WebAudio.prototype.isUse = function () {
+            return boombox.HTMLAudio.prototype.isUse.apply(this, arguments);
+        };
+
         /**
          * Is playing. (apply HTMLAudio)
          *
@@ -2387,9 +2555,10 @@
          * @name isPlayback
          * @return {Boolean}
          */
+        WebAudio.prototype.isPlayback = function () {
             return !!this.source && !!this.state.time.playback && !this.state.time.pause && (this.source.playbackState === 1 || this.source.playbackState === 2);
-        }
-        isStop() {
+        };
+
         /**
          * Is stoped. (apply HTMLAudio)
          *
@@ -2398,9 +2567,10 @@
          * @name isStop
          * @return {Boolean}
          */
+        WebAudio.prototype.isStop = function () {
             return !this.source;
-        }
-        isPause() {
+        };
+
         /**
          * Is paused. (apply HTMLAudio)
          *
@@ -2409,9 +2579,10 @@
          * @name isPause
          * @return {Boolean}
          */
-            super.isPause();
-        }
-        isLoop() {
+        WebAudio.prototype.isPause = function () {
+            return boombox.HTMLAudio.prototype.isPause.apply(this, arguments);
+        };
+
         /**
          * Loop flag (apply HTMLAudio)
          *
@@ -2420,9 +2591,10 @@
          * @name isLoop
          * @return {Interger}
          */
-            super.isLoop();
-        }
-        isParentSprite() {
+        WebAudio.prototype.isLoop = function () {
+            return boombox.HTMLAudio.prototype.isLoop.apply(this, arguments);
+        };
+
         /**
          * Is sprite of the parent (apply HTMLAudio)
          *
@@ -2431,20 +2603,23 @@
          * @name isParentSprite
          * @return {Boolean}
          */
-            super.isParentSprite();
-        }
-        isSprite() {
+        WebAudio.prototype.isParentSprite = function () {
+            return boombox.HTMLAudio.prototype.isParentSprite.apply(this, arguments);
+        };
+
+
         /**
-         * Is sprite of the parent (apply HTMLAudio)
+         * Is sprite (apply HTMLAudio)
          *
          * @memberof WebAudio
          * @method
-         * @name isParentSprite
+         * @name isSprite
          * @return {Boolean}
          */
-            super.isSprite();
-        }
-        clearTimerAll() {
+        WebAudio.prototype.isSprite = function () {
+            return boombox.HTMLAudio.prototype.isSprite.apply(this, arguments);
+        };
+
         /**
          * Clear all the setTimeout (apply HTMLAudio)
          *
@@ -2453,9 +2628,10 @@
          * @name clearTimerAll
          * @return {WebAudio}
          */
-            super.clearTimerAll();
-        }
-        clearTimer(name) {
+        WebAudio.prototype.clearTimerAll = function () {
+            return boombox.HTMLAudio.prototype.clearTimerAll.apply(this, arguments);
+        };
+
         /**
          * Clear specified setTimeout (apply HTMLAudio)
          *
@@ -2465,9 +2641,10 @@
          * @param {String} name
          * @return {Interger}
          */
-            super.clearTimer(name);
-        }
-        setTimer(name, id) {
+        WebAudio.prototype.clearTimer = function (name) {
+            return boombox.HTMLAudio.prototype.clearTimer.apply(this, arguments);
+        };
+
         /**
          * Save the specified setTimeout (apply HTMLAudio)
          *
@@ -2478,9 +2655,13 @@
          * @param {Interger} id setTimeout#id
          * @return {Interger}
          */
-            super.setTimer(name, id);
-        }
-        play(resume) {
+        WebAudio.prototype.setTimer = function (name, id) {
+            return boombox.HTMLAudio.prototype.setTimer.apply(this, arguments);
+        };
+
+
+        //////////
+
         /**
          * audio play.
          *
@@ -2489,6 +2670,7 @@
          * @name play
          * @return {WebAudio}
          */
+        WebAudio.prototype.play = function (resume) {
             var self = this;
 
             if (!this.isUse()) {
@@ -2592,8 +2774,8 @@
             }
 
             return this;
-        }
-        stop() {
+        };
+
         /**
          * audio stop.
          *
@@ -2602,6 +2784,8 @@
          * @name stop
          * @return {WebAudio}
          */
+        WebAudio.prototype.stop = function () {
+
             if (!this.state.loaded || typeof this.state.error !== 'undefined') {
                 this.logger.debug('skip stop:', this.name, 'state can not be used');
                 return this;
@@ -2624,8 +2808,8 @@
             this.sourceDispose();
 
             return this;
-        }
-        pause() {
+        };
+
         /**
          * audio pause.
          *
@@ -2634,6 +2818,7 @@
          * @name pause
          * @return {WebAudio}
          */
+        WebAudio.prototype.pause = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip pause:', this.name, 'state can not be used');
                 return this;
@@ -2668,8 +2853,8 @@
             }
 
             return this;
-        }
-        resume() {
+        };
+
         /**
          * audio resume.
          *
@@ -2678,6 +2863,7 @@
          * @name resume
          * @return {WebAudio}
          */
+        WebAudio.prototype.resume = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip resume:', this.name, 'state can not be used');
                 return this;
@@ -2687,8 +2873,8 @@
                 this.play(true);
             }
             return this;
-        }
-        replay() {
+        };
+
         /**
          * audio re-play.
          *
@@ -2697,6 +2883,7 @@
          * @name replay
          * @return {WebAudio}
          */
+        WebAudio.prototype.replay = function () {
             if (!this.isUse()) {
                 this.logger.debug('skip replay:', this.name, 'state can not be used');
                 return this;
@@ -2708,8 +2895,8 @@
             this.sourceDispose();
             this.play();
             return this;
-        }
-        volume(v) {
+        };
+
         /**
          * audio change volume.
          *
@@ -2718,10 +2905,13 @@
          * @name volume
          * @return {WebAudio}
          */
+        WebAudio.prototype.volume = function (v) {
             this.logger.trace('volume:', this.name, 'volume:', v);
             this.gainNode.gain.value = v;
-        }
-        _onEnded(e) {
+        };
+
+        //////////
+
         /**
          * Audio.ended events
          *
@@ -2730,6 +2920,7 @@
          * @name _onEnded
          * @param {Event} e event
          */
+        WebAudio.prototype._onEnded = function (e) {
             // check dispose
             if (this.isDisposed()) {
                 return;
@@ -2759,8 +2950,8 @@
             } else {
                 this.sourceDispose();
             }
-        }
-        onEnded() {
+        };
+
         /**
          * Override Audio.ended events
          *
@@ -2769,9 +2960,11 @@
          * @name onEnded
          * @param {Event} e event
          */
-            none();
-        }
-        setLoop(loop) {
+        WebAudio.prototype.onEnded = none;
+
+
+        //////////
+
         /**
          * Set loop flag
          *
@@ -2781,6 +2974,7 @@
          * @param {Interger} loop loop flag (boombox.LOOP_XXX)
          * @return {WebAudio}
          */
+        WebAudio.prototype.setLoop = function (loop) {
             if (!this.isUse()) { return this; } // skip!!
 
             this.state.loop = loop;
@@ -2789,7 +2983,7 @@
                     this.source.loop = boombox.LOOP_NOT;
                 }
 
-                //} else if (loop === boombox.LOOP_ORIGINAL) {
+            //} else if (loop === boombox.LOOP_ORIGINAL) {
             } else if (loop === boombox.LOOP_NATIVE) {
                 if (this.source) {
                     this.source.loop = loop;
@@ -2797,8 +2991,8 @@
             }
             return this;
 
-        }
-        power(p) {
+        };
+
         /**
          * Change power on/off (apply HTMLAudio)
          *
@@ -2808,9 +3002,13 @@
          * @param {Boolean} p power on/off. boombox.(POWER_ON|POWER_OFF)
          * @return {WebAudio}
          */
-            super.power(p);
-        }
-        sourceDispose() {
+        WebAudio.prototype.power = function (p) {
+            return boombox.HTMLAudio.prototype.power.apply(this, arguments);
+        };
+
+
+        //////////
+
         /**
          * Dispose AudioBufferSourceNode
          *
@@ -2818,24 +3016,26 @@
          * @method
          * @name sourceDispose
          */
+        WebAudio.prototype.sourceDispose = function () {
             this.logger.trace('source dispose', this.name);
             this.source && this.source.disconnect();
             this.source = undefined;
             this.state.time.playback = undefined;
             this.state.time.pause = undefined;
             this.state.time.progress = 0;
-        }
-        isDisposed() {
+        };
+
         /**
          * Check disposed
          * @memberof WebAudio
          * @method
          * @name isDisposed
          */
+        WebAudio.prototype.isDisposed = function () {
             this.logger.trace('check dispose flag', !!this.state);
             return !this.state;
-        }
-        dispose() {
+        };
+
         /**
          * Dispose
          *
@@ -2843,9 +3043,14 @@
          * @method
          * @name dispose
          */
+        WebAudio.prototype.dispose = function () {
             this.logger.trace('WebAudio dispose', this.name);
 
             delete this.buffer;
+
+            //delete this.state.time.playback;
+            //delete this.state.time.pause;
+            //delete this.source;
 
             this.sourceDispose();
             delete this.source;
@@ -2870,11 +3075,15 @@
             delete this.name;
             this.gainNode && this.gainNode.disconnect && delete this.gainNode;
             this.ctx = null;
-        }
-    }
 
-    class Sprite {
-        constructor(options, current) {
+        };
+
+
+        return WebAudio;
+    })();
+
+    var Sprite = (function () {
+        function Sprite(options, current) {
             /**
              * logger
              * @memberof Sprite
@@ -2902,18 +3111,26 @@
                 }
             }
         }
-        dispose() {
+
+        //////////
+
         /**
          * Dispose
          * @memberof Sprite
          * @method
          * @name dispose
          */
+        Sprite.prototype.dispose = function () {
             this.options = null;
             delete this.options;
             delete this.current;
-        }
-    }
+        };
+
+        return Sprite;
+    })();
+
+
+
 
     // Building
     boombox.HTMLAudio = HTMLAudio;

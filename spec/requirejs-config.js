@@ -10,7 +10,7 @@
             "zepto": "http://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min",
             "mocha": "./node_modules/mocha/mocha",
             "chai": "./node_modules/chai/chai",
-            "boombox": "./boombox",
+            "boombox": "./boombox.dist",
             "spec": './spec'
         },
         "shim": {

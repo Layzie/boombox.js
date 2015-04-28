@@ -90,7 +90,7 @@
 
         // task: build
         grunt.registerTask('build', [
-            'jshint',
+            // 'jshint',
             'babel',
             'uglify:default'
         ]);
