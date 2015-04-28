@@ -44,7 +44,8 @@
     "start": "grunt foundation",
     "build": "grunt build",
     "docs": "grunt docs",
-    "release": "grunt default"
+    "release": "grunt default",
+    "watch": "grunt watch"
   },
   "repository": {
     "type": "git",
@@ -58,6 +59,7 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-jshint": "~0.6.3",
     "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-exec": "~0.4.2",
     "grunt-jsdoc": "~0.4.1",
     "grunt-mkdir": "~0.1.1",

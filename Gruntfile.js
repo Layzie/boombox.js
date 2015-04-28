@@ -77,6 +77,12 @@
                         'boombox.dist.js': 'boombox.js'
                     }
                 }
+            },
+            watch: {
+                scripts: {
+                    files: ['boombox.js'],
+                    tasks: ['babel']
+                }
             }
         });
 
@@ -91,7 +97,6 @@
         // task: build
         grunt.registerTask('build', [
             // 'jshint',
-            'babel',
             'uglify:default'
         ]);
 
