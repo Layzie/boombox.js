@@ -623,13 +623,13 @@
          * @return {Boombox}
          */
             if (obj.isParentSprite()) {
-                for (var r in this.pool) {
+                for (let r in this.pool) {
                     if (!! ~r.indexOf(name + SPRITE_SEPARATOR)) {
                         delete this.pool[r];
                     }
                 }
 
-                for (var n in obj.sprite.options) {
+                for (let n in obj.sprite.options) {
                     var cname = name + SPRITE_SEPARATOR + n;
                     var audio = new Obj(cname, obj);
                     this.pool[audio.name] = audio;
@@ -655,10 +655,10 @@
 
             var list = options.filter || [];
 
-            for (var i = 0; i < list.length; i++) {
-                var name = list[i];
+            for (let i = 0; i < list.length; i++) {
+                let name = list[i];
 
-                var fn = this.filter[name];
+                let fn = this.filter[name];
                 if (!fn) {
                     this.logger.warn('filter not found. name:', name);
                     return;
@@ -688,7 +688,7 @@
          * @param {Array} src audio file data
          * @return {Object|undefined}
          */
-            for (var i = 0; i < src.length; i++) {
+            for (let i = 0; i < src.length; i++) {
                 var t = src[i];
                 if (this._audio.canPlayType(t.media)) {
                     return t;
@@ -710,7 +710,7 @@
             var self = this;
             this.logger.trace('pause');
 
-            for (var name in this.pool) {
+            for (let name in this.pool) {
                 var audio = this.pool[name];
                 audio.pause();
                 self.waits.push(name);
@@ -748,7 +748,7 @@
             var self = this;
             this.logger.trace('power:', this.name, 'flag:', p);
 
-            for (var name in this.pool) {
+            for (let name in this.pool) {
                 var audio = this.pool[name];
                 audio.power(p);
             }
@@ -769,7 +769,7 @@
             var self = this;
             this.logger.trace('volume:', this.name, 'volume:', v);
 
-            for (var name in this.pool) {
+            for (let name in this.pool) {
                 var audio = this.pool[name];
                 audio.volume(v);
             }
@@ -843,7 +843,6 @@
          * @name _browserControl
          * @return {Boombox}
          */
-            var self = this;
             if (typeof document.hidden !== 'undefined') {
                 this.visibility.hidden = 'hidden';
                 this.visibility.visibilityChange = 'visibilitychange';
@@ -859,35 +858,35 @@
             }
             // Visibility.hidden
             if (this.visibility.hidden) {
-                document.addEventListener(this.visibility.visibilityChange, function (e) {
-                    self.onVisibilityChange(e);
+                document.addEventListener(this.visibility.visibilityChange, (e) => {
+                    this.onVisibilityChange(e);
                 }, false);
             }
 
             // focus/blur
             if (typeof window.addEventListener !== 'undefined') {
-                window.addEventListener('focus', function (e) {
-                    self.onFocus(e);
+                window.addEventListener('focus', (e) => {
+                    this.onFocus(e);
                 }, false);
-                window.addEventListener('blur', function (e) {
-                    self.onBlur(e);
+                window.addEventListener('blur', (e) => {
+                    this.onBlur(e);
                 }, false);
             } else {
-                window.attachEvent('onfocusin', function (e) {
-                    self.onFocus(e);
+                window.attachEvent('onfocusin', (e) => {
+                    this.onFocus(e);
                 }, false);
-                window.attachEvent('onfocusout', function (e) {
-                    self.onBlur(e);
+                window.attachEvent('onfocusout', (e) => {
+                    this.onBlur(e);
                 }, false);
             }
 
             // onpage show/hide
-            window.onpageshow = function (e) {
-                self.onPageShow(e);
+            window.onpageshow = (e) => {
+                this.onPageShow(e);
             };
 
-            window.onpagehide = function (e) {
-                self.onPageHide(e);
+            window.onpagehide = (e) => {
+                this.onPageHide(e);
             };
 
             //
@@ -913,8 +912,8 @@
          * @memberof Boombox
          * @name dispose
          */
-            for (var name in this.pool) {
-                var audio = this.pool[name];
+            for (let name in this.pool) {
+                let audio = this.pool[name];
                 audio.dispose && audio.dispose();
             }
 
@@ -982,10 +981,10 @@
              */
             this.sprite = undefined;
             if (parent) {
-                var sprite_n = getSpriteName(name);
+                let sprite_n = getSpriteName(name);
 
                 // change Sprite
-                var current = parent.sprite.options[sprite_n.suffix];
+                let current = parent.sprite.options[sprite_n.suffix];
 
                 /**
                  * Reference of the parent instance HTMLAudio
@@ -1023,7 +1022,7 @@
                 this.$el = new w.Audio();
             }
         }
-        load(options, callback) {
+        load(options = { preload: 'auto', autoplay: false, loop: false, muted: false, controls: false }, callback = none) {
         /**
          * Loading html audio
          *
@@ -1049,25 +1048,10 @@
          * }, function callback() {});
          *
          */
-            var cb = callback || none;
-
             if (this.parent) { // skip audiosprite children
-                cb(null, this);
+                callback(null, this);
                 return this;
             }
-
-            options = options || {
-                //src: '',
-                //type: '',
-                //media: '',
-                preload: 'auto', // auto, metadata, none
-                autoplay: false, // no-auto
-                //mediagroup: 'boombox',
-                loop: false,
-                muted: false,
-                //crossorigin: "anonymous",
-                controls: false
-            };
 
             var timeout = options.timeout || 15 * 1000;
             delete options.timeout;
@@ -1078,13 +1062,11 @@
             }
 
 
-            for (var k in options) {
-                var v = options[k];
+            for (let k in options) {
+                let v = options[k];
                 this.logger.trace('HTMLAudioElement attribute:', k, v);
                 this.$el[k] = v;
             }
-
-            var self = this;
 
             // Debug log
             /**
@@ -1126,29 +1108,29 @@
             this.logger.trace('hook event name:', hookEventName);
 
 
-            this.$el.addEventListener(hookEventName, function _canplay(e) {
-                self.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
+            this.$el.addEventListener(hookEventName,  function _canplay(e) {
+                this.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
 
-                self.state.loaded = true;
+                this.state.loaded = true;
 
-                self.$el.removeEventListener(hookEventName, _canplay, false);
+                this.$el.removeEventListener(hookEventName, _canplay, false);
 
-                return cb(null, self);
-            });
+                return callback(null, this);
+            }.bind(this));
 
             this.$el.addEventListener(
                 'ended',
-                function (e) {
-                    self._onEnded(e);
+                e => {
+                    this._onEnded(e);
                 },
                 false);
 
             // communication time-out
-            setTimeout(function () {
-                if (self.$el && self.$el.readyState !== 4) {
-                    self.$el.src = '';
-                    cb(new Error('load of html audio file has timed out. timeout:' + timeout), self);
-                    cb = function () {};
+            setTimeout(() => {
+                if (this.$el && this.$el.readyState !== 4) {
+                    this.$el.src = '';
+                    callback(new Error('load of html audio file has timed out. timeout:' + timeout), this);
+                    callback = () => {};
                 }
             }, timeout);
 
@@ -1250,8 +1232,8 @@
          * @name clearTimerAll
          * @return {HTMLAudio}
          */
-            for (var k in this._timer) {
-                var id = this._timer[k];
+            for (let k in this._timer) {
+                let id = this._timer[k];
                 this.clearTimer(k);
             }
             return this;
@@ -1313,8 +1295,6 @@
                 return this;
             }
 
-            var self = this;
-
             var type = 'play';
             var fn = none;
 
@@ -1326,12 +1306,12 @@
 
                 if (this.isSprite()) {
                     var _pause = this.state.time.pause;
-                    fn = function () {
-                        var interval = Math.ceil((self.sprite.current.end - _pause) * 1000); // (ms)
+                    fn = () => {
+                        var interval = Math.ceil((this.sprite.current.end - _pause) * 1000); // (ms)
 
-                        self.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded(); // fire onended evnet
+                        this.setTimer('play', setTimeout(function () {
+                            this.stop();
+                            this._onEnded(); // fire onended evnet
                         }, interval));
                     };
                 }
@@ -1698,7 +1678,7 @@
 
             }
         }
-        load(options, callback) {
+        load(options = { preload: 'auto', autoplay: false, loop: false, muted: false, controls: false }, callback = none) {
         /**
          * Loading html video
          *
@@ -1724,27 +1704,11 @@
          * }, function callback() {});
          *
          */
-            var self = this;
-
-            var cb = callback || none;
-
             if (this.parent) { // skip audiosprite children
-                cb(null, this);
+                callback(null, this);
                 return this;
             }
 
-            options = options || {
-                //src: '',
-                //type: '',
-                //media: '',
-                preload: 'auto', // auto, metadata, none
-                autoplay: false, // no-auto
-                //mediagroup: 'boombox',
-                loop: false,
-                muted: false,
-                //crossorigin: "anonymous",
-                controls: false
-            };
             var timeout = options.timeout || 15 * 1000;
             delete options.timeout;
 
@@ -1753,8 +1717,8 @@
                 delete options.spritemap;
             }
 
-            for (var k in options) {
-                var v = options[k];
+            for (let k in options) {
+                let v = options[k];
                 self.logger.trace('HTMLVideoElement attribute:', k, v);
                 self.$el[k] = v;
             }
@@ -1800,31 +1764,31 @@
                 hookEventName = 'stalled';
             }
 
-            self.logger.trace('hook event name:', hookEventName);
+            this.logger.trace('hook event name:', hookEventName);
 
             this.$el.addEventListener(hookEventName, function _canplay(e) {
-                self.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
+                this.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
 
-                self.state.loaded = true;
+                this.state.loaded = true;
 
-                self.$el.removeEventListener(hookEventName, _canplay, false);
+                this.$el.removeEventListener(hookEventName, _canplay, false);
 
-                return cb(null, self);
-            });
+                return callback(null, this);
+            }.bind(this));
 
             this.$el.addEventListener(
                 'ended',
-                function (e) {
-                    self._onEnded(e);
+                 e => {
+                    this._onEnded(e);
                 },
                 false);
 
             // communication time-out
-            setTimeout(function () {
-                if (self.$el && self.$el.readyState !== 4) {
-                    self.$el.src = '';
-                    cb(new Error('load of html video file has timed out. timeout:' + timeout), self);
-                    cb = function () {};
+            setTimeout(() => {
+                if (this.$el && this.$el.readyState !== 4) {
+                    this.$el.src = '';
+                    callback(new Error('load of html video file has timed out. timeout:' + timeout), this);
+                    callback= function () {};
                 }
             }, timeout);
 
@@ -1966,8 +1930,6 @@
                 return this;
             }
 
-            var self = this;
-
             var type = 'play';
             var fn = none;
 
@@ -1979,12 +1941,12 @@
 
                 if (this.isSprite()) {
                     var _pause = this.state.time.pause;
-                    fn = function () {
-                        var interval = Math.ceil((self.sprite.current.end - _pause) * 1000); // (ms)
+                    fn = () => {
+                        var interval = Math.ceil((this.sprite.current.end - _pause) * 1000); // (ms)
 
-                        self.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded(); // fire onended evnet
+                        this.setTimer('play', setTimeout(function () {
+                            this.stop();
+                            this._onEnded(); // fire onended evnet
                         }, interval));
                     };
                 }
@@ -2001,11 +1963,11 @@
                     var start = this.sprite.current.start;
                     this.setCurrentTime(start);
 
-                    fn = function () {
-                        var interval = Math.ceil(self.sprite.current.term * 1000); // (ms)
-                        self.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded(); // fire onended evnet
+                    fn = () => {
+                        var interval = Math.ceil(this.sprite.current.term * 1000); // (ms)
+                        this.setTimer('play', setTimeout(function () {
+                            this.stop();
+                            this._onEnded(); // fire onended evnet
                         }, interval));
                     };
                 }
@@ -2266,7 +2228,7 @@
                 this.sprite = new Sprite(undefined, current); // new
             }
         }
-        load(options, callback) {
+        load(options = {}, callback = none) {
         /**
          * Loading web audio
          *
@@ -2283,14 +2245,9 @@
          * }, function callback() {});
          *
          */
-            var self = this;
-            options = options || {};
-
-            var cb = callback || none;
-
             if (this.parent) {
                 //this.buffer = this.parent.buffer; // ref
-                cb(null, this);
+                callback(null, this);
                 return this;
             }
 
@@ -2299,48 +2256,48 @@
                 delete options.spritemap;
             }
 
-            for (var k in options) {
-                var v = options[k];
+            for (let k in options) {
+                let v = options[k];
                 this.logger.trace('WebAudio attribute:', k, v);
             }
 
 
             var http = new XMLHttpRequest();
-            http.onload = function (e) {
+            http.onload = e => {
                 if (e.target.status.toString().charAt(0) === '2') {
-                    self.ctx.decodeAudioData(
+                    this.ctx.decodeAudioData(
                         http.response,
-                        function (buffer) {
+                        buffer => {
                             if (!buffer) {
-                                self.logger.error('error decode file data: ', options.url);
-                                return cb(new Error('error decode file data'), self);
+                                this.logger.error('error decode file data: ', options.url);
+                                return callback(new Error('error decode file data'), this);
                             }
 
-                            self.buffer = buffer;
+                            this.buffer = buffer;
 
-                            self.state.loaded = true;
+                            this.state.loaded = true;
 
                             /////
                             // audiosprite propagation
-                            if (self.isParentSprite()) {
-                                for (var k in boombox.pool) {
-                                    if (!!~k.indexOf(self.name + SPRITE_SEPARATOR)) {
+                            if (this.isParentSprite()) {
+                                for (let k in boombox.pool) {
+                                    if (!!~k.indexOf(this.name + SPRITE_SEPARATOR)) {
                                         boombox.pool[k].buffer = buffer; // ref buffer
-                                        boombox.pool[k].state.loaded = self.state.loaded;  // not ref copy
+                                        boombox.pool[k].state.loaded = this.state.loaded;  // not ref copy
                                     }
                                 }
                             }
 
 
-                            return cb(null, self);
+                            return callback(null, this);
                         },
-                        function () {
-                            return cb(new Error('fail to decode file data'), self);
+                        () => {
+                            return callback(new Error('fail to decode file data'), this);
                         }
                     );
                 } else {
-                    self.logger.error('fail to load resource: ', options.url);
-                    return cb(new Error('fail to load resource'), self);
+                    this.logger.error('fail to load resource: ', options.url);
+                    return callback(new Error('fail to load resource'), this);
                 }
             };
 
@@ -2348,11 +2305,11 @@
             var timeout = options.timeout || 15 * 1000;
 
             // communication time-out
-            setTimeout(function () {
+            setTimeout(() => {
                 if (http.readyState !== 4) {
                     http.abort();
-                    cb(new Error('load of web audio file has timed out. timeout:' + timeout), self);
-                    cb = none;
+                    callback(new Error('load of web audio file has timed out. timeout:' + timeout), this);
+                    callback = none;
                 }
             }, timeout);
 
@@ -2489,8 +2446,6 @@
          * @name play
          * @return {WebAudio}
          */
-            var self = this;
-
             if (!this.isUse()) {
                 this.logger.debug('skip play:', this.name, 'state can not be used');
                 return this;
@@ -2531,11 +2486,11 @@
                 if (this.isSprite()) {
                     var pause_sec = this.state.time.pause / 1000; // (sec)
                     start = this.sprite.current.start + pause_sec; // Start position (sec)
-                    var interval = Math.ceil((self.sprite.current.term - pause_sec) * 1000); // (ms)
-                    fn = function () {
-                        self.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded(); // fire onended evnet
+                    var interval = Math.ceil((this.sprite.current.term - pause_sec) * 1000); // (ms)
+                    fn = () => {
+                        this.setTimer('play', setTimeout(() => {
+                            this.stop();
+                            this._onEnded(); // fire onended evnet
                         }, interval));
 
                     };
@@ -2549,12 +2504,12 @@
                 if (this.isSprite()) {
                     start = this.sprite.current.start;
 
-                    fn = function () {
-                        var interval = Math.ceil(self.sprite.current.term * 1000);
+                    fn = () => {
+                        var interval = Math.ceil(this.sprite.current.term * 1000);
 
-                        self.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded(); // fire onended evnet
+                        this.setTimer('play', setTimeout(() => {
+                            this.stop();
+                            this._onEnded(); // fire onended evnet
                         }, interval));
                     };
 
@@ -2568,14 +2523,14 @@
             var duration = this.buffer.duration - start;
             if (!this.isSprite()) {
                 if (this.source.hasOwnProperty('onended')) {
-                    this.source.onended = function (e) {
-                        self._onEnded(e);
+                    this.source.onended = e => {
+                        this._onEnded(e);
                     };
                 } else {
                     var interval = Math.ceil(duration * 1000);
-                    this.setTimer('play', setTimeout(function () {
-                        self.stop();
-                        self._onEnded();
+                    this.setTimer('play', setTimeout(() => {
+                        this.stop();
+                        this._onEnded();
                     }, interval));
                 }
             }
@@ -2585,7 +2540,7 @@
                 this.source.start(0, start, this.buffer.duration);
             } else {
                 if (this.isSprite()) {
-                    duration = self.sprite.current.term;
+                    duration = this.sprite.current.term;
                 }
                 this.logger.debug('use source.noteGrainOn()', this.name, start, duration);
                 this.source.noteGrainOn(0, start, duration);
@@ -2897,7 +2852,7 @@
              */
             this.options = options;
             if (!current) { // parent
-                for (var k in this.options) {
+                for (let k in this.options) {
                     this.options[k].term = this.options[k].end - this.options[k].start;
                 }
             }
@@ -2918,7 +2873,7 @@
     // Building
     boombox.HTMLAudio = HTMLAudio;
     boombox.HTMLVideo = HTMLVideo;
-    boombox.WebAudio = WebAudio;
+    boombox.WebAudio  = WebAudio;
 
     if (isRequire) {
         define([], function () {

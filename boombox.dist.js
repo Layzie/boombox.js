@@ -693,17 +693,17 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 var list = options.filter || [];
 
                 for (var i = 0; i < list.length; i++) {
-                    var name = list[i];
+                    var _name2 = list[i];
 
-                    var fn = this.filter[name];
+                    var fn = this.filter[_name2];
                     if (!fn) {
-                        this.logger.warn('filter not found. name:', name);
+                        this.logger.warn('filter not found. name:', _name2);
                         return;
                     }
-                    this.logger.debug('filter run. name:', name);
+                    this.logger.debug('filter run. name:', _name2);
 
-                    if (fn(name, audio, options)) {
-                        hit = name;
+                    if (fn(_name2, audio, options)) {
+                        hit = _name2;
                         break;
                     }
                 }
@@ -751,10 +751,10 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 var self = this;
                 this.logger.trace('pause');
 
-                for (var name in this.pool) {
-                    var audio = this.pool[name];
+                for (var _name3 in this.pool) {
+                    var audio = this.pool[_name3];
                     audio.pause();
-                    self.waits.push(name);
+                    self.waits.push(_name3);
                 }
 
                 return this;
@@ -793,8 +793,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 var self = this;
                 this.logger.trace('power:', this.name, 'flag:', p);
 
-                for (var name in this.pool) {
-                    var audio = this.pool[name];
+                for (var _name4 in this.pool) {
+                    var audio = this.pool[_name4];
                     audio.power(p);
                 }
 
@@ -816,8 +816,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 var self = this;
                 this.logger.trace('volume:', this.name, 'volume:', v);
 
-                for (var name in this.pool) {
-                    var audio = this.pool[name];
+                for (var _name5 in this.pool) {
+                    var audio = this.pool[_name5];
                     audio.volume(v);
                 }
 
@@ -895,6 +895,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
         }, {
             key: '_browserControl',
             value: function _browserControl() {
+                var _this = this;
+
                 /**
                  * Scan browser differences
                  *
@@ -902,7 +904,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * @name _browserControl
                  * @return {Boombox}
                  */
-                var self = this;
                 if (typeof document.hidden !== 'undefined') {
                     this.visibility.hidden = 'hidden';
                     this.visibility.visibilityChange = 'visibilitychange';
@@ -919,34 +920,34 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 // Visibility.hidden
                 if (this.visibility.hidden) {
                     document.addEventListener(this.visibility.visibilityChange, function (e) {
-                        self.onVisibilityChange(e);
+                        _this.onVisibilityChange(e);
                     }, false);
                 }
 
                 // focus/blur
                 if (typeof window.addEventListener !== 'undefined') {
                     window.addEventListener('focus', function (e) {
-                        self.onFocus(e);
+                        _this.onFocus(e);
                     }, false);
                     window.addEventListener('blur', function (e) {
-                        self.onBlur(e);
+                        _this.onBlur(e);
                     }, false);
                 } else {
                     window.attachEvent('onfocusin', function (e) {
-                        self.onFocus(e);
+                        _this.onFocus(e);
                     }, false);
                     window.attachEvent('onfocusout', function (e) {
-                        self.onBlur(e);
+                        _this.onBlur(e);
                     }, false);
                 }
 
                 // onpage show/hide
                 window.onpageshow = function (e) {
-                    self.onPageShow(e);
+                    _this.onPageShow(e);
                 };
 
                 window.onpagehide = function (e) {
-                    self.onPageHide(e);
+                    _this.onPageHide(e);
                 };
 
                 //
@@ -976,8 +977,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * @memberof Boombox
                  * @name dispose
                  */
-                for (var name in this.pool) {
-                    var audio = this.pool[name];
+                for (var _name6 in this.pool) {
+                    var audio = this.pool[_name6];
                     audio.dispose && audio.dispose();
                 }
 
@@ -1091,7 +1092,12 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
         _createClass(HTMLAudio, [{
             key: 'load',
-            value: function load(options, callback) {
+            value: function load() {
+                var _this2 = this;
+
+                var options = arguments[0] === undefined ? { preload: 'auto', autoplay: false, loop: false, muted: false, controls: false } : arguments[0];
+                var callback = arguments[1] === undefined ? none : arguments[1];
+
                 /**
                  * Loading html audio
                  *
@@ -1117,26 +1123,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * }, function callback() {});
                  *
                  */
-                var cb = callback || none;
-
                 if (this.parent) {
                     // skip audiosprite children
-                    cb(null, this);
+                    callback(null, this);
                     return this;
                 }
-
-                options = options || {
-                    //src: '',
-                    //type: '',
-                    //media: '',
-                    preload: 'auto', // auto, metadata, none
-                    autoplay: false, // no-auto
-                    //mediagroup: 'boombox',
-                    loop: false,
-                    muted: false,
-                    //crossorigin: "anonymous",
-                    controls: false
-                };
 
                 var timeout = options.timeout || 15 * 1000;
                 delete options.timeout;
@@ -1152,8 +1143,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     this.logger.trace('HTMLAudioElement attribute:', k, v);
                     this.$el[k] = v;
                 }
-
-                var self = this;
 
                 // Debug log
                 /**
@@ -1195,26 +1184,26 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
                 this.logger.trace('hook event name:', hookEventName);
 
-                this.$el.addEventListener(hookEventName, function _canplay(e) {
-                    self.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
+                this.$el.addEventListener(hookEventName, (function _canplay(e) {
+                    this.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
 
-                    self.state.loaded = true;
+                    this.state.loaded = true;
 
-                    self.$el.removeEventListener(hookEventName, _canplay, false);
+                    this.$el.removeEventListener(hookEventName, _canplay, false);
 
-                    return cb(null, self);
-                });
+                    return callback(null, this);
+                }).bind(this));
 
                 this.$el.addEventListener('ended', function (e) {
-                    self._onEnded(e);
+                    _this2._onEnded(e);
                 }, false);
 
                 // communication time-out
                 setTimeout(function () {
-                    if (self.$el && self.$el.readyState !== 4) {
-                        self.$el.src = '';
-                        cb(new Error('load of html audio file has timed out. timeout:' + timeout), self);
-                        cb = function () {};
+                    if (_this2.$el && _this2.$el.readyState !== 4) {
+                        _this2.$el.src = '';
+                        callback(new Error('load of html audio file has timed out. timeout:' + timeout), _this2);
+                        callback = function () {};
                     }
                 }, timeout);
 
@@ -1382,6 +1371,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
         }, {
             key: 'play',
             value: function play(resume) {
+                var _this3 = this;
+
                 /**
                  * audio play.
                  *
@@ -1401,8 +1392,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     return this;
                 }
 
-                var self = this;
-
                 var type = 'play';
                 var fn = none;
 
@@ -1415,11 +1404,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     if (this.isSprite()) {
                         var _pause = this.state.time.pause;
                         fn = function () {
-                            var interval = Math.ceil((self.sprite.current.end - _pause) * 1000); // (ms)
+                            var interval = Math.ceil((_this3.sprite.current.end - _pause) * 1000); // (ms)
 
-                            self.setTimer('play', setTimeout(function () {
-                                self.stop();
-                                self._onEnded(); // fire onended evnet
+                            _this3.setTimer('play', setTimeout(function () {
+                                this.stop();
+                                this._onEnded(); // fire onended evnet
                             }, interval));
                         };
                     }
@@ -1820,7 +1809,12 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
         _createClass(HTMLVideo, [{
             key: 'load',
-            value: function load(options, callback) {
+            value: function load() {
+                var _this4 = this;
+
+                var options = arguments[0] === undefined ? { preload: 'auto', autoplay: false, loop: false, muted: false, controls: false } : arguments[0];
+                var callback = arguments[1] === undefined ? none : arguments[1];
+
                 /**
                  * Loading html video
                  *
@@ -1846,28 +1840,12 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * }, function callback() {});
                  *
                  */
-                var self = this;
-
-                var cb = callback || none;
-
                 if (this.parent) {
                     // skip audiosprite children
-                    cb(null, this);
+                    callback(null, this);
                     return this;
                 }
 
-                options = options || {
-                    //src: '',
-                    //type: '',
-                    //media: '',
-                    preload: 'auto', // auto, metadata, none
-                    autoplay: false, // no-auto
-                    //mediagroup: 'boombox',
-                    loop: false,
-                    muted: false,
-                    //crossorigin: "anonymous",
-                    controls: false
-                };
                 var timeout = options.timeout || 15 * 1000;
                 delete options.timeout;
 
@@ -1927,28 +1905,28 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     hookEventName = 'stalled';
                 }
 
-                self.logger.trace('hook event name:', hookEventName);
+                this.logger.trace('hook event name:', hookEventName);
 
-                this.$el.addEventListener(hookEventName, function _canplay(e) {
-                    self.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
+                this.$el.addEventListener(hookEventName, (function _canplay(e) {
+                    this.logger.trace('processEvent ' + e.target.id + ' : ' + e.type, 'event');
 
-                    self.state.loaded = true;
+                    this.state.loaded = true;
 
-                    self.$el.removeEventListener(hookEventName, _canplay, false);
+                    this.$el.removeEventListener(hookEventName, _canplay, false);
 
-                    return cb(null, self);
-                });
+                    return callback(null, this);
+                }).bind(this));
 
                 this.$el.addEventListener('ended', function (e) {
-                    self._onEnded(e);
+                    _this4._onEnded(e);
                 }, false);
 
                 // communication time-out
                 setTimeout(function () {
-                    if (self.$el && self.$el.readyState !== 4) {
-                        self.$el.src = '';
-                        cb(new Error('load of html video file has timed out. timeout:' + timeout), self);
-                        cb = function () {};
+                    if (_this4.$el && _this4.$el.readyState !== 4) {
+                        _this4.$el.src = '';
+                        callback(new Error('load of html video file has timed out. timeout:' + timeout), _this4);
+                        callback = function () {};
                     }
                 }, timeout);
 
@@ -2092,6 +2070,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
         }, {
             key: 'play',
             value: function play(resume) {
+                var _this5 = this;
+
                 /**
                  * video play.
                  *
@@ -2111,8 +2091,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     return this;
                 }
 
-                var self = this;
-
                 var type = 'play';
                 var fn = none;
 
@@ -2125,11 +2103,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     if (this.isSprite()) {
                         var _pause = this.state.time.pause;
                         fn = function () {
-                            var interval = Math.ceil((self.sprite.current.end - _pause) * 1000); // (ms)
+                            var interval = Math.ceil((_this5.sprite.current.end - _pause) * 1000); // (ms)
 
-                            self.setTimer('play', setTimeout(function () {
-                                self.stop();
-                                self._onEnded(); // fire onended evnet
+                            _this5.setTimer('play', setTimeout(function () {
+                                this.stop();
+                                this._onEnded(); // fire onended evnet
                             }, interval));
                         };
                     }
@@ -2146,10 +2124,10 @@ var _createClass = (function () { function defineProperties(target, props) { for
                         this.setCurrentTime(start);
 
                         fn = function () {
-                            var interval = Math.ceil(self.sprite.current.term * 1000); // (ms)
-                            self.setTimer('play', setTimeout(function () {
-                                self.stop();
-                                self._onEnded(); // fire onended evnet
+                            var interval = Math.ceil(_this5.sprite.current.term * 1000); // (ms)
+                            _this5.setTimer('play', setTimeout(function () {
+                                this.stop();
+                                this._onEnded(); // fire onended evnet
                             }, interval));
                         };
                     }
@@ -2439,7 +2417,12 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
         _createClass(WebAudio, [{
             key: 'load',
-            value: function load(options, callback) {
+            value: function load() {
+                var _this6 = this;
+
+                var options = arguments[0] === undefined ? {} : arguments[0];
+                var callback = arguments[1] === undefined ? none : arguments[1];
+
                 /**
                  * Loading web audio
                  *
@@ -2456,14 +2439,9 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * }, function callback() {});
                  *
                  */
-                var self = this;
-                options = options || {};
-
-                var cb = callback || none;
-
                 if (this.parent) {
                     //this.buffer = this.parent.buffer; // ref
-                    cb(null, this);
+                    callback(null, this);
                     return this;
                 }
 
@@ -2481,34 +2459,34 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 var http = new XMLHttpRequest();
                 http.onload = function (e) {
                     if (e.target.status.toString().charAt(0) === '2') {
-                        self.ctx.decodeAudioData(http.response, function (buffer) {
+                        _this6.ctx.decodeAudioData(http.response, function (buffer) {
                             if (!buffer) {
-                                self.logger.error('error decode file data: ', options.url);
-                                return cb(new Error('error decode file data'), self);
+                                _this6.logger.error('error decode file data: ', options.url);
+                                return callback(new Error('error decode file data'), _this6);
                             }
 
-                            self.buffer = buffer;
+                            _this6.buffer = buffer;
 
-                            self.state.loaded = true;
+                            _this6.state.loaded = true;
 
                             /////
                             // audiosprite propagation
-                            if (self.isParentSprite()) {
+                            if (_this6.isParentSprite()) {
                                 for (var k in boombox.pool) {
-                                    if (!! ~k.indexOf(self.name + SPRITE_SEPARATOR)) {
+                                    if (!! ~k.indexOf(_this6.name + SPRITE_SEPARATOR)) {
                                         boombox.pool[k].buffer = buffer; // ref buffer
-                                        boombox.pool[k].state.loaded = self.state.loaded; // not ref copy
+                                        boombox.pool[k].state.loaded = _this6.state.loaded; // not ref copy
                                     }
                                 }
                             }
 
-                            return cb(null, self);
+                            return callback(null, _this6);
                         }, function () {
-                            return cb(new Error('fail to decode file data'), self);
+                            return callback(new Error('fail to decode file data'), _this6);
                         });
                     } else {
-                        self.logger.error('fail to load resource: ', options.url);
-                        return cb(new Error('fail to load resource'), self);
+                        _this6.logger.error('fail to load resource: ', options.url);
+                        return callback(new Error('fail to load resource'), _this6);
                     }
                 };
 
@@ -2519,8 +2497,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 setTimeout(function () {
                     if (http.readyState !== 4) {
                         http.abort();
-                        cb(new Error('load of web audio file has timed out. timeout:' + timeout), self);
-                        cb = none;
+                        callback(new Error('load of web audio file has timed out. timeout:' + timeout), _this6);
+                        callback = none;
                     }
                 }, timeout);
 
@@ -2670,6 +2648,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
         }, {
             key: 'play',
             value: function play(resume) {
+                var _this7 = this;
+
                 /**
                  * audio play.
                  *
@@ -2678,8 +2658,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
                  * @name play
                  * @return {WebAudio}
                  */
-                var self = this;
-
                 if (!this.isUse()) {
                     this.logger.debug('skip play:', this.name, 'state can not be used');
                     return this;
@@ -2720,11 +2698,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     if (this.isSprite()) {
                         var pause_sec = this.state.time.pause / 1000; // (sec)
                         start = this.sprite.current.start + pause_sec; // Start position (sec)
-                        var interval = Math.ceil((self.sprite.current.term - pause_sec) * 1000); // (ms)
+                        var interval = Math.ceil((this.sprite.current.term - pause_sec) * 1000); // (ms)
                         fn = function () {
-                            self.setTimer('play', setTimeout(function () {
-                                self.stop();
-                                self._onEnded(); // fire onended evnet
+                            _this7.setTimer('play', setTimeout(function () {
+                                _this7.stop();
+                                _this7._onEnded(); // fire onended evnet
                             }, interval));
                         };
                     }
@@ -2737,11 +2715,11 @@ var _createClass = (function () { function defineProperties(target, props) { for
                         start = this.sprite.current.start;
 
                         fn = function () {
-                            var interval = Math.ceil(self.sprite.current.term * 1000);
+                            var interval = Math.ceil(_this7.sprite.current.term * 1000);
 
-                            self.setTimer('play', setTimeout(function () {
-                                self.stop();
-                                self._onEnded(); // fire onended evnet
+                            _this7.setTimer('play', setTimeout(function () {
+                                _this7.stop();
+                                _this7._onEnded(); // fire onended evnet
                             }, interval));
                         };
                     }
@@ -2754,13 +2732,13 @@ var _createClass = (function () { function defineProperties(target, props) { for
                 if (!this.isSprite()) {
                     if (this.source.hasOwnProperty('onended')) {
                         this.source.onended = function (e) {
-                            self._onEnded(e);
+                            _this7._onEnded(e);
                         };
                     } else {
                         var interval = Math.ceil(duration * 1000);
                         this.setTimer('play', setTimeout(function () {
-                            self.stop();
-                            self._onEnded();
+                            _this7.stop();
+                            _this7._onEnded();
                         }, interval));
                     }
                 }
@@ -2770,7 +2748,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
                     this.source.start(0, start, this.buffer.duration);
                 } else {
                     if (this.isSprite()) {
-                        duration = self.sprite.current.term;
+                        duration = this.sprite.current.term;
                     }
                     this.logger.debug('use source.noteGrainOn()', this.name, start, duration);
                     this.source.noteGrainOn(0, start, duration);
