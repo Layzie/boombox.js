@@ -57,7 +57,7 @@
                 },
                 default: {
                     files: {
-                        'boombox.min.js': ['boombox.js']
+                        'boombox.min.js': ['boombox.dist.js']
                     }
                 }
             },
@@ -65,6 +65,16 @@
                 default: {
                     files: {
                         'report': ['boombox.js']
+                    }
+                }
+            },
+            babel: {
+                options: {
+                    sourceMap: true
+                },
+                dist: {
+                    files: {
+                        'boombox.dist.js': 'boombox.js'
                     }
                 }
             }
@@ -81,6 +91,7 @@
         // task: build
         grunt.registerTask('build', [
             'jshint',
+            'babel',
             'uglify:default'
         ]);
 
